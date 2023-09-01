@@ -1,4 +1,5 @@
 from utils import global_utils, android_connection
+from PIL import Image, ImageDraw #to get the resolution
 import os
 import cv2
 import config
@@ -9,6 +10,7 @@ import time
 import pyautogui
 
 
+
 # Given a screenshot of the hand cards, returns a list of the detected cards
 def get_my_hand_cards(screenshot, screenshot_dimensions, counter, show_image):
     start = global_utils.start_timer()
@@ -16,12 +18,42 @@ def get_my_hand_cards(screenshot, screenshot_dimensions, counter, show_image):
     my_cards = screenshot[config.card_hand['x']:screenshot_dimensions[0] -
                           config.card_hand['y'], 0:screenshot_dimensions[1]]
     cv2.imwrite(file_name, my_cards)
-    haystack = file_name
+    haystack = file_name #this is the picture we will look into for cards
+    haystack_image = Image.open(file_name)
+    haystack_size = haystack_image.size
+    #logging.info("Hand_cards: "+str(haystack_size))
+    #print("Haystack size:", str(haystack_size))
     found_cards = []
     for card_folder in os.listdir(config.data_folder):
         card_folder_path = config.data_folder+"\\"+card_folder
         for card_haystack in os.listdir(card_folder_path):
             card_needle = card_folder_path+"\\"+card_haystack
+            
+            needle_image = Image.open(card_folder_path+"\\"+card_haystack)
+                        
+            # Calculate the aspect ratio of the needle
+            needle_aspect_ratio = needle_image.width / needle_image.height
+            haystack_image_ratio = haystack_image.width / haystack_image.height
+
+            # Check if card image is opposite ratio of the screenshot e.g. 9:16 (vertical)
+            if haystack_image_ratio>needle_aspect_ratio: 
+                
+                # Calculate the desired height of the needle to fit within the haystack
+                desired_height = haystack_image.height // 1  # You can adjust this value to control the size
+                
+                # Calculate the corresponding width based on the aspect ratio
+                desired_width = int(desired_height * needle_aspect_ratio)
+                
+                # Resize the needle image while maintaining the desired aspect ratio
+                needle_image = needle_image.resize((desired_width, desired_height), Image.LANCZOS)
+                print("resized")
+                # Calculate the height of the second third of the needle
+                second_third_height = needle_image.height // 3
+
+                #(left, top, right, bottom) #https://deeplearninguniversity.com/pillow-python/pillow-crop-and-paste/
+                search_region_needle = needle_image.crop((int(round(needle_image.width * 0.1, 0)), needle_image.height * 0.4, int(round(needle_image.width * 0.90, 0)), needle_image.height * 0.7))
+                              
+            logging.info(str(card_needle.width))
             card_location = pyautogui.locate(
                 card_needle, haystack, grayscale=True, confidence=0.6)
             if card_location:
@@ -30,9 +62,12 @@ def get_my_hand_cards(screenshot, screenshot_dimensions, counter, show_image):
                     if found_card[0] == card_folder:
                         already_in_cards_array = True
                 if not already_in_cards_array:
+                    logging.info("not in array")
                     card_to_add = [card_folder, [
                         card_location[0], card_location[1]]]
                     found_cards.append(card_to_add)
+            else: 
+                logging.info("not found")
     if show_image:
         cv2.imshow("My cards", my_cards)
     end = global_utils.end_timer()

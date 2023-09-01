@@ -1,5 +1,5 @@
-adb_path = 'D:\\JocsPC\\Nox\\bin'
-project_path = 'F:\\WebPages\\Bots\\marvelSnapBot'
+adb_path = "C:\\Users\\Fabian\\Downloads\\platform-tools_r34.0.4-windows\\platform-tools" #'D:\\JocsPC\\Nox\\bin'
+project_path = 'C:\\Users\Fabian\\Documents\\GitHub\\marvel-snap-bot'
 images_folder = project_path + '\\images'
 fields_folder = images_folder + '\\fields'
 mana_folder = images_folder + '\\mana'
