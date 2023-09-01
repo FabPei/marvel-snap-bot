@@ -20,9 +20,6 @@ def get_my_hand_cards(screenshot, screenshot_dimensions, counter, show_image):
     cv2.imwrite(file_name, my_cards)
     haystack = file_name #this is the picture we will look into for cards
     haystack_image = Image.open(file_name)
-    haystack_size = haystack_image.size
-    #logging.info("Hand_cards: "+str(haystack_size))
-    #print("Haystack size:", str(haystack_size))
     found_cards = []
     for card_folder in os.listdir(config.data_folder):
         card_folder_path = config.data_folder+"\\"+card_folder
@@ -46,14 +43,13 @@ def get_my_hand_cards(screenshot, screenshot_dimensions, counter, show_image):
                 
                 # Resize the needle image while maintaining the desired aspect ratio
                 needle_image = needle_image.resize((desired_width, desired_height), Image.LANCZOS)
-                print("resized")
+
                 # Calculate the height of the second third of the needle
                 second_third_height = needle_image.height // 3
 
                 #(left, top, right, bottom) #https://deeplearninguniversity.com/pillow-python/pillow-crop-and-paste/
                 search_region_needle = needle_image.crop((int(round(needle_image.width * 0.1, 0)), needle_image.height * 0.4, int(round(needle_image.width * 0.90, 0)), needle_image.height * 0.7))
-                              
-            logging.info(str(card_needle.width))
+                card_needle = search_region_needle
             card_location = pyautogui.locate(
                 card_needle, haystack, grayscale=True, confidence=0.6)
             if card_location:
