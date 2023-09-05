@@ -13,6 +13,7 @@ import pyautogui
 
 # Given a screenshot of the hand cards, returns a list of the detected cards
 def get_my_hand_cards(screenshot, screenshot_dimensions, counter, show_image):
+    logging.getLogger('PIL').setLevel(logging.WARNING)
     start = global_utils.start_timer()
     file_name = config.project_path+"\\tmp\\hand_cards_" + str(counter)+".png"
     my_cards = screenshot[config.card_hand['x']:screenshot_dimensions[0] -
@@ -49,21 +50,26 @@ def get_my_hand_cards(screenshot, screenshot_dimensions, counter, show_image):
 
                 #(left, top, right, bottom) #https://deeplearninguniversity.com/pillow-python/pillow-crop-and-paste/
                 search_region_needle = needle_image.crop((int(round(needle_image.width * 0.1, 0)), needle_image.height * 0.4, int(round(needle_image.width * 0.90, 0)), needle_image.height * 0.7))
+                #search_region_needle.show()
+                haystack = haystack_image
                 card_needle = search_region_needle
             card_location = pyautogui.locate(
-                card_needle, haystack, grayscale=True, confidence=0.6)
+                card_needle, haystack, grayscale=True, confidence=0.7)
             if card_location:
+                #logging.info("found")
                 already_in_cards_array = False
                 for found_card in found_cards:
                     if found_card[0] == card_folder:
                         already_in_cards_array = True
                 if not already_in_cards_array:
-                    logging.info("not in array")
+                    #logging.info("not in array")
                     card_to_add = [card_folder, [
                         card_location[0], card_location[1]]]
                     found_cards.append(card_to_add)
             else: 
-                logging.info("not found")
+                #logging.info("not found")
+                #do
+                i = 2
     if show_image:
         cv2.imshow("My cards", my_cards)
     end = global_utils.end_timer()
